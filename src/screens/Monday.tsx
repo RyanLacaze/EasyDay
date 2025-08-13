@@ -1,138 +1,89 @@
 import React from 'react';
-import { Text, View, ScrollView , Button, TouchableOpacity, StyleSheet, Pressable, Image } from 'react-native';
+import { Text, View, ScrollView , Button, StyleSheet, Pressable, FlatList, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react';
 
-const img1 = require('../assets/menage1.jpg');
+import Title from '../components/Title';
+import ButtonEdit from '../components/ButtonEdit';
+import ButtonDelete from '../components/ButtonDelete';
+import ButtonNavigation from '../components/ButtonNavigation';
+import ButtonAdd from '../components/ButtonAdd';
+import Task from '../data/Task.json';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import TaskComponent from '../components/TaskComponent';
 
-export default function Monday() {
+/*const doneTasks = tasks.filter(task => task.done);
+const todoTasks = tasks.filter(task => !task.done);*/
+
+//const [tasks, setTasks] = useState([]);
+
+export default function Monday({navigation}: any) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#d3c4caff',
       alignItems: 'center',
-      paddingTop: 70,
-      paddingBottom: 40,
-    },
-    text: {
-      fontSize: 25,
     },
   });
 
   const styles2 = StyleSheet.create({
     container: {
       width: 350,
-      height: 100,
+      height: 120,
       alignItems: 'center',
       justifyContent: 'center',
       margin: 20,
       borderRadius: 10,
     },
-    backgroundItemsGreen: {
-      backgroundColor: '#18da31ff',
+    textTask: {
+      fontSize: 20,
     },
-    backgroundItemsOrange: {
-      backgroundColor: '#d55901ff',
-    },
-    backgroundItemsRed: {
-      backgroundColor: '#d50202ff',
-    },
-    text: {
+    textPriority: {
       fontSize: 15,
     },
-  });
-
-  const stylesMonday = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      //justifyContent: 'center'
-    },
-  });
-
-  const stylesButton = StyleSheet.create({
-    container: {
-      width: 350,
-      height: 100,
-      margin: 20,
+    Items: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
     },
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
 
       <ScrollView>
       
-        <View style={stylesMonday.container}>
-          <Text style={styles.text}>Lundi</Text>
-        </View>
-        
+        <Title>Lundi</Title>
 
-        <View style={[styles2.container, styles2.backgroundItemsRed]}>
-
-          <Text style={styles2.text}>Tâche 1</Text>
-
-          <View>
-            <Button
-              title='Modifier'
-              color='#3b2b55ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-            <Button
-              title='Supprimer'
-              color='#ff1616ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-          </View>
-
-        </View>
-
-        <View style={[styles2.container, styles2.backgroundItemsOrange]}>
-
-          <Text style={styles2.text}>Tâche 2</Text>
-
-          <View>
-            <Button
-              title='Modifier'
-              color='#3b2b55ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-            <Button
-              title='Supprimer'
-              color='#ff1616ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-          </View>
-
-        </View>
-
-        <View style={[styles2.container, styles2.backgroundItemsOrange]}>
-
-          <Text style={styles2.text}>Tâche 3</Text>
-
-          <View>
-            <Button
-              title='Modifier'
-              color='#3b2b55ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-            <Button
-              title='Supprimer'
-              color='#ff1616ff'
-              onPress={() => console.log('Bouton pressé')}
-            />
-          </View>
-
-        </View>
-
-        <View style={[styles2.container, styles2.backgroundItemsGreen]}>
-
-          <Text style={styles2.text}>Tâche 4</Text>
-
-        </View>
+        {Task.map((task) => (
+          <TaskComponent
+            key={task.id}
+            id={task.id}
+            title={task.title}
+            priority={task.priority}
+            status={task.status}
+          />
+        ))}
       </ScrollView>
-    </View>
+
+      <View>
+        <ButtonAdd
+        title="+"
+        onPress={() => navigation.navigate('AddPage')}>
+        </ButtonAdd>
+      </View>
+
+      <View style={styles2.Items}>
+          <ButtonNavigation
+          title='<'
+          onPress={() => navigation.navigate('Sunday')}>
+          </ButtonNavigation>
+
+         <ButtonNavigation
+          title='>'
+          onPress={() => navigation.navigate('Tuesday')}>
+          </ButtonNavigation>
+        </View>
+    </SafeAreaView>
     
   );
-
-
-
 }

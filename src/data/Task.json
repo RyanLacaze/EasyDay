@@ -1,0 +1,6 @@
+[
+    {"id": 1, "title": "Faire le menage", "priority": "haute", "status": "en cours"},
+    {"id": 2, "title": "Passer le balai", "priority": "moyenne", "status": "a faire"},
+    {"id": 3, "title": "Sortir la poubelle", "priority": "faible", "status": "fait"},
+    {"id": 4, "title": "Faire la vaisselle", "priority": "haute", "status": "fait"}
+]
