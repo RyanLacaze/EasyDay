@@ -1,6 +1,8 @@
 import React from 'react';
 import {Text, View, StyleSheet, TextStyle, Alert} from 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import ButtonEdit from '../components/ButtonEdit';
 import ButtonDelete from '../components/ButtonDelete';
 import ButtonNavigation from '../components/ButtonNavigation';
@@ -14,16 +16,26 @@ type TaskProps = {
   title: string;
   priority: string;
   status: string;
+  day: string;
+  onDelete?: (id: number) => void;
+};
+
+type TaskType = {
+  id: number;
+  title: string;
+  priority: string;
+  status: string;
+  day: string;
 };
 
 type RootStackParamList = {
   Home: undefined;
-  EditPage: {id: number};
+  EditPage: {id: number; day: string};
 };
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
-export default function TaskComponent({id, title, priority, status}: TaskProps) {
+export default function TaskComponent({id, title, priority, status, day, onDelete}: TaskProps) {
   const navigation = useNavigation<NavigationProp>();
 
   const stylesTask = StyleSheet.create({
@@ -69,6 +81,27 @@ export default function TaskComponent({id, title, priority, status}: TaskProps) 
     }
   };
   
+  const STORAGE_KEY = `tasks_${day}`;
+
+  const handleDelete = async () => {
+  // On récupère toutes les tâches
+  const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
+  if (storedTasks) {
+    const tasks: TaskType[] = JSON.parse(storedTasks);
+
+    // On retire celle avec l'id actuel
+    const updatedTasks = tasks.filter(t => t.id !== id);
+
+    // On sauvegarde
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTasks));
+
+    // Si tu veux mettre à jour la liste dans la page parente
+    if (onDelete) {
+      onDelete(id);
+    }
+  }
+};
+  
     return (
         <View style={[stylesTask.container, getBackgroundColor()]}>
           <Text style={stylesTask.title}>{title}</Text>
@@ -77,12 +110,12 @@ export default function TaskComponent({id, title, priority, status}: TaskProps) 
 
           <ButtonEdit 
             title="Modifier"
-            onPress={() => navigation.navigate('EditPage', { id })}>
+            onPress={() => navigation.navigate('EditPage', { id, day })}>
           </ButtonEdit>
             
           <ButtonDelete 
             title="Supprimer"
-            onPress={() => Alert.alert(`Voulez vous vraiment supprimer cette tâche ${id} ?`)}>
+            onPress= {handleDelete}>
           </ButtonDelete>
         </View>
     );

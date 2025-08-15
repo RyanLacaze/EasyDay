@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Text, View, ScrollView , Button, StyleSheet, Pressable, FlatList, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import Title from '../components/Title';
-import ButtonEdit from '../components/ButtonEdit';
-import ButtonDelete from '../components/ButtonDelete';
 import ButtonNavigation from '../components/ButtonNavigation';
 import ButtonAdd from '../components/ButtonAdd';
 import Task from '../data/Task.json';
@@ -15,7 +14,12 @@ import TaskComponent from '../components/TaskComponent';
 /*const doneTasks = tasks.filter(task => task.done);
 const todoTasks = tasks.filter(task => !task.done);*/
 
-//const [tasks, setTasks] = useState([]);
+type TaskType = {
+  id: number;
+  title: string;
+  priority: string;
+  status: string;
+};
 
 export default function Monday({navigation}: any) {
   const styles = StyleSheet.create({
@@ -47,6 +51,39 @@ export default function Monday({navigation}: any) {
     },
   });
 
+  const STORAGE_KEY = "tasks_lundi"; // <-- Clé unique pour le lundi
+
+  useEffect(() => {
+    const initTasks = async () => {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(Task));
+      }
+    };
+    initTasks();
+  }, []);
+
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+
+  const loadTasks = async () => {
+    const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+  };
+
+  // Chargement initial
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  // Recharge à chaque retour sur la page
+  useFocusEffect(
+    useCallback(() => {
+      loadTasks();
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
 
@@ -54,21 +91,23 @@ export default function Monday({navigation}: any) {
       
         <Title>Lundi</Title>
 
-        {Task.map((task) => (
-          <TaskComponent
-            key={task.id}
-            id={task.id}
-            title={task.title}
-            priority={task.priority}
-            status={task.status}
-          />
+        {tasks.map(task => (
+        <TaskComponent
+        key={task.id}
+        {...task}
+        day="lundi"
+        onDelete={(deletedId) => {
+          setTasks(prevTasks => prevTasks.filter(t => t.id !== deletedId));
+        }}
+        />
         ))}
+
       </ScrollView>
 
       <View>
         <ButtonAdd
         title="+"
-        onPress={() => navigation.navigate('AddPage')}>
+        onPress={() => navigation.navigate('AddPage', { day: "lundi" })}>
         </ButtonAdd>
       </View>
 

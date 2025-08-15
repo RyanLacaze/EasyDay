@@ -7,8 +7,6 @@ import Task from '../data/Task.json';
 import ButtonConfirm from '../components/ButtonConfirm';
 import { useState } from 'react';
 
-const img1 = require('../assets/menage1.jpg');
-
 export default function EditPage({navigation}: any) {
   const styles = StyleSheet.create({
     container: {
@@ -50,7 +48,9 @@ export default function EditPage({navigation}: any) {
   });
 
   const route = useRoute();
-  const { id } = route.params as { id: number };
+  const { id, day } = route.params as { id: number; day: string };
+
+  const STORAGE_KEY = `tasks_${day}`;
 
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('');
@@ -58,7 +58,7 @@ export default function EditPage({navigation}: any) {
 
   useEffect(() => {
     const loadTask = async () => {
-      const storedTasks = await AsyncStorage.getItem('tasks');
+      const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedTasks) {
         const tasks = JSON.parse(storedTasks);
         const taskToEdit = tasks.find((t: any) => t.id === id);
@@ -73,13 +73,13 @@ export default function EditPage({navigation}: any) {
   }, [id]);
 
   const saveChanges = async () => {
-  const storedTasks = await AsyncStorage.getItem('tasks');
+  const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
   if (storedTasks) {
     let tasks = JSON.parse(storedTasks);
     tasks = tasks.map((t: any) =>
       t.id === id ? { ...t, title, priority, status } : t
     );
-    await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     navigation.goBack();
   }
 };
@@ -91,7 +91,6 @@ export default function EditPage({navigation}: any) {
       <ScrollView>
       
         <Title>Modifier</Title>
-        
 
         <View style={[styles2.container, styles2.background]}>
 

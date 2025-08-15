@@ -1,10 +1,18 @@
 import React from 'react';
-import { Text, View, ScrollView , Button, StyleSheet, TextInput } from 'react-native';
+import { Text, View, ScrollView , Button, StyleSheet, TextInput, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Title from '../components/Title';
 import ButtonConfirm from '../components/ButtonConfirm';
+import Task from '../data/Task.json';
+import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 
-const img1 = require('../assets/menage1.jpg');
+type TaskType = {
+  id: number;
+  title: string;
+  priority: string;
+  status: string;
+};
 
 export default function AddPage({navigation}: any) {
   const styles = StyleSheet.create({
@@ -46,6 +54,43 @@ export default function AddPage({navigation}: any) {
   },
   });
 
+  const route = useRoute();
+  const { day } = route.params as { day: string };
+
+  const STORAGE_KEY = `tasks_${day}`;
+
+  const handleAddTask = async () => {
+  if (!title || !priority || !status) {
+    Alert.alert("Veuillez remplir tous les champs !");
+    return;
+  }
+
+  // Récupérer les tâches existantes
+  const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
+
+  let tasks: TaskType[] = storedTasks ? JSON.parse(storedTasks) : [];
+
+  // Générer un nouvel ID (max + 1)
+  const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+
+  // Créer la nouvelle tâche
+  const newTask = {
+    id: newId,
+    title,
+    priority,
+    status
+  };
+
+  // Ajouter à la liste
+  tasks.push(newTask);
+
+  // Sauvegarder
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+
+  // Retour à la page précédente
+  navigation.goBack();
+};
+
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('');
   const [status, setStatus] = useState('');
@@ -86,7 +131,7 @@ export default function AddPage({navigation}: any) {
 
           <ButtonConfirm
           title='Ajouter'
-          onPress={() => console.log('Ajouter')}>
+          onPress= {handleAddTask}>
           </ButtonConfirm>
 
         </View>
